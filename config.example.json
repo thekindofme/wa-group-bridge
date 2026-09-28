@@ -1,0 +1,11 @@
+{
+  "out_dir": "~/wa-exposed",
+  "groups": [
+    {
+      "slug": "my-group",
+      "jid": "000000000000000000@g.us",
+      "label": "My Group"
+    }
+  ],
+  "me": "Your Name"
+}

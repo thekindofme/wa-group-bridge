@@ -1,0 +1,23 @@
+// wag-sync: the only program that should hold macOS permission to read
+// WhatsApp's data. The sync script and the group allow-list are compiled in.
+import Foundation
+
+let script = String(data: Data(base64Encoded: "@SCRIPT_B64@")!, encoding: .utf8)!
+let config = String(data: Data(base64Encoded: "@CONFIG_B64@")!, encoding: .utf8)!
+
+// Only harmless flags pass through; nothing can redirect the config or source.
+let passthrough = CommandLine.arguments.dropFirst().filter { $0 == "--no-media" }
+
+let p = Process()
+p.executableURL = URL(fileURLWithPath: "/usr/bin/python3")
+// -I: ignore PYTHON* env vars and user site-packages; -S: skip site imports.
+p.arguments = ["-I", "-S", "-c", script, "--config-json", config] + passthrough
+p.environment = ["HOME": NSHomeDirectory(), "PATH": "/usr/bin:/bin", "LANG": "en_US.UTF-8"]
+do {
+    try p.run()
+    p.waitUntilExit()
+    exit(p.terminationStatus)
+} catch {
+    FileHandle.standardError.write("wag-sync: \(error)\n".data(using: .utf8)!)
+    exit(1)
+}
